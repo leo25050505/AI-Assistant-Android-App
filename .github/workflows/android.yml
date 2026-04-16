@@ -1,34 +1,14 @@
-name: Build APK
+- name: Build APK
+  run: |
+    chmod +x gradlew
+    ./gradlew clean
+    ./gradlew :app:assembleDebug --stacktrace
 
-on:
-  push:
-    branches: [ "main" ]
+- name: Find APK
+  run: find . -name "*.apk"
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Setup JDK
-      uses: actions/setup-java@v4
-      with:
-        distribution: temurin
-        java-version: 17
-
-    - name: Build APK
-      run: |
-        chmod +x gradlew
-        ./gradlew clean
-        ./gradlew assembleDebug --stacktrace
-
-    - name: Find APK
-      run: find . -name "*.apk"
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: app-debug
-        path: app/build/outputs/apk/debug/*.apk
+- name: Upload APK
+  uses: actions/upload-artifact@v4
+  with:
+    name: app-debug
+    path: app/build/outputs/apk/debug/*.apk

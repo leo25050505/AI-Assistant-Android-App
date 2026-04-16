@@ -3,31 +3,40 @@ name: Build APK
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Setup JDK
+      - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
-      - name: Build APK
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
+      - name: Build Debug APK (force app module)
         run: |
-          chmod +x gradlew
+          ./gradlew clean
           ./gradlew :app:assembleDebug --stacktrace --info --no-daemon
 
-      - name: Find APK
-        run: find . -name "*.apk"
+      - name: Show build outputs (debug用)
+        run: |
+          echo "==== CHECK APK FILES ===="
+          find . -name "*.apk" || true
+          echo "==== LIST BUILD FOLDER ===="
+          ls -R app/build || true
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
